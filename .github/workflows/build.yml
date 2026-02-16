@@ -23,7 +23,7 @@ jobs:
           channel: 'stable'
 
       - name: Build APK
-        run: flet build apk mobile_app.py --no-interactive
+        run: yes | flet build apk mobile_app.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
