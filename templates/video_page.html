@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ video.filename }} - MyTube</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f9f9f9; display: flex; flex-direction: column; }
+        header { background: #fff; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
+        .logo { color: #ff0000; font-size: 22px; font-weight: bold; text-decoration: none; }
+
+        .main-content { display: flex; padding: 20px 5%; gap: 24px; }
+        .video-column { flex: 3; }
+        .sidebar { flex: 1; }
+
+        video { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; }
+        .video-title { font-size: 20px; font-weight: bold; margin: 15px 0 10px; }
+        .video-stats { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #ddd; }
+
+        .author-box { display: flex; align-items: center; gap: 12px; margin-top: 15px; }
+        .avatar { width: 40px; height: 40px; background: #ccc; border-radius: 50%; }
+        .sub-btn { background: #0f0f0f; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+
+        .suggestion-card { display: flex; gap: 10px; margin-bottom: 12px; text-decoration: none; color: black; }
+        .suggestion-card video { width: 160px; aspect-ratio: 16/9; }
+        .suggestion-info { font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/" class="logo">▶ MyTube</a>
+</header>
+
+<div class="main-content">
+    <div class="video-column">
+        <video controls autoplay>
+            <source src="{{ url_for('serve_video', filename=video.filename) }}" type="video/mp4">
+        </video>
+        <div class="video-title">{{ video.filename }}</div>
+        <div class="video-stats">
+            <div class="author-box">
+                <div class="avatar"></div>
+                <div>
+                    <div style="font-weight: bold;">{{ video.author }}</div>
+                    <div style="font-size: 12px; color: #606060;">77,2 тыс. подписчиков</div>
+                </div>
+                <button class="sub-btn">Подписаться</button>
+            </div>
+            <div>
+                <a href="/like/{{ video.id }}" style="text-decoration:none; color:black; background:#eee; padding:8px 15px; border-radius:20px;">👍 {{ video.likes }}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h4 style="margin-top:0;">Рекомендуем</h4>
+        {% for item in suggestions %}
+        <a href="/video_details/{{ item.id }}" class="suggestion-card">
+            <video muted><source src="{{ url_for('serve_video', filename=item.filename) }}"></video>
+            <div class="suggestion-info">{{ item.filename }}</div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>

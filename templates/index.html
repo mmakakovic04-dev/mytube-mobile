@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>MyTube</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f9f9f9; }
+        header { background: #fff; padding: 10px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
+        .logo { color: #ff0000; font-size: 24px; font-weight: bold; text-decoration: none; }
+
+        .nav-btns { display: flex; align-items: center; gap: 15px; }
+        .plus-btn { background: #f2f2f2; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid #ddd; }
+
+        /* Окна (модалки) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; width: 350px; margin: 15% auto; padding: 25px; border-radius: 15px; text-align: center; position: relative; }
+        .close { position: absolute; right: 15px; top: 10px; cursor: pointer; font-size: 20px; }
+
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px 5%; }
+        .v-card { background: white; border-radius: 12px; overflow: hidden; text-decoration: none; color: black; transition: 0.2s; }
+        .v-card:hover { transform: translateY(-5px); }
+        .v-card video { width: 100%; aspect-ratio: 16/9; background: #000; }
+        .v-info { padding: 12px; display: flex; gap: 10px; }
+        .mini-av { width: 32px; height: 32px; border-radius: 50%; background: #eee; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/" class="logo">▶ MyTube</a>
+    <div class="nav-btns">
+        {% if session.get('user') %}
+            <button class="plus-btn" onclick="openM('upModal')">+</button>
+            <img src="{{ url_for('static', filename='avatars/' + user_data.avatar) }}" class="user-avatar" onclick="openM('avModal')">
+            <a href="/logout" style="text-decoration:none; color: #666; font-size: 14px;">Выйти</a>
+        {% else %}
+            <a href="/login" style="text-decoration:none; color: #065fd4; font-weight: bold;">Войти</a>
+        {% endif %}
+    </div>
+</header>
+
+<div id="upModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeM('upModal')">&times;</span>
+        <h3>Новое видео</h3>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="video" accept="video/mp4" required style="margin-bottom:10px;">
+            <div><input type="checkbox" name="is_shorts"> Это Shorts</div>
+            <button type="submit" style="background:#ff0000; color:white; border:none; padding:10px 20px; border-radius:20px; margin-top:15px; width:100%; cursor:pointer;">Опубликовать</button>
+        </form>
+    </div>
+</div>
+
+<div id="avModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeM('avModal')">&times;</span>
+        <h3>Сменить фото профиля</h3>
+        <form action="/set_avatar" method="post" enctype="multipart/form-data">
+            <input type="file" name="avatar" accept="image/*" required>
+            <button type="submit" style="background:#065fd4; color:white; border:none; padding:10px 20px; border-radius:20px; margin-top:15px; width:100%; cursor:pointer;">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<div class="video-grid">
+    {% for v in videos %}
+    <div class="v-card">
+        <a href="/video_details/{{ v.id }}">
+            <video muted onmouseover="this.play()" onmouseout="this.pause()">
+                <source src="{{ url_for('serve_video', filename=v.filename) }}">
+            </video>
+        </a>
+        <div class="v-info">
+            <div class="mini-av"></div>
+            <div>
+                <div style="font-weight:bold;">{{ v.filename }}</div>
+                <div style="font-size:13px; color:#666;">{{ v.author }} • 👍 {{ v.likes_count|length }}</div>
+                <a href="/like/{{ v.id }}" style="text-decoration:none; font-size:12px; color:#065fd4;">Лайк / Дизлайк</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function openM(id) { document.getElementById(id).style.display = 'block'; }
+    function closeM(id) { document.getElementById(id).style.display = 'none'; }
+    window.onclick = function(e) { if(e.target.className==='modal') e.target.style.display='none'; }
+</script>
+
+</body>
+</html>
