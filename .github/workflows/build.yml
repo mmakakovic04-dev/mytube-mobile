@@ -24,5 +24,14 @@ jobs:
 
       - name: Build APK
         run: |
+          # Переименовываем твой файл в main.py, как хочет Flet
           mv mobile_app.py main.py
+          # Автоматически жмем "yes" на все вопросы лицензий
           yes | flet build apk
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mytube-app
+          # Указываем точный путь к файлу, чтобы он появился в Artifacts
+          path: build/apk/app-release.apk
