@@ -1,31 +1,26 @@
 import flet as ft
 import os
 
-
 def main(page: ft.Page):
+    # Базовые настройки для мобилки
     page.title = "MyTube Mobile"
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.padding = 0
-    page.window_width = 400  # Делаем окно размером с телефон
-    page.window_height = 700
+    page.padding = 10
+    
+    # Мы убрали фиксированные размеры окна (window_width), 
+    # чтобы Android не сходил с ума при запуске.
 
-    # 1. Верхняя панель (AppBar)
+    # 1. Верхняя панель
     page.appbar = ft.AppBar(
         leading=ft.Icon(ft.icons.PLAY_CIRCLE_FILL, color="red", size=30),
-        leading_width=40,
-        title=ft.Text("MyTube", weight="bold", color="black"),
-        bgcolor="white",
-        actions=[
-            ft.IconButton(ft.icons.SEARCH, icon_color="black"),
-            ft.IconButton(ft.icons.NOTIFICATIONS_OUTLINED, icon_color="black"),
-        ],
+        title=ft.Text("MyTube", weight="bold"),
+        bgcolor=ft.colors.SURFACE_VARIANT,
     )
 
-    # 2. Функция создания карточки видео
+    # 2. Карточка видео
     def create_video_card(title, author):
         return ft.Container(
             content=ft.Column([
-                # Заглушка вместо видео (черный прямоугольник)
                 ft.Container(
                     height=200,
                     bgcolor="black",
@@ -36,38 +31,48 @@ def main(page: ft.Page):
                     leading=ft.CircleAvatar(content=ft.Text(author[0])),
                     title=ft.Text(title, weight="bold"),
                     subtitle=ft.Text(f"{author} • 1.2 млн просмотров"),
-                    trailing=ft.Icon(ft.icons.MORE_VERT),
                 )
             ]),
             margin=ft.margin.only(bottom=20)
         )
 
-    # 3. Список видео из твоей папки uploads
-    video_feed = ft.Column(scroll="auto", expand=True, spacing=0)
+    video_feed = ft.Column(scroll="auto", expand=True)
 
-    video_dir = "uploads"
-    if os.path.exists(video_dir):
+    # 3. Безопасная загрузка контента (защита от белого экрана)
+    try:
+        video_dir = "uploads"
+        # Создаем папку, если её нет, чтобы код не "падал"
+        if not os.path.exists(video_dir):
+            os.makedirs(video_dir, exist_ok=True)
+            
         files = [f for f in os.listdir(video_dir) if f.endswith(".mp4")]
+        
         if not files:
-            video_feed.controls.append(ft.Text("Видео не найдены", size=20))
-        for file in files:
-            video_feed.controls.append(create_video_card(file, "Admin"))
-    else:
-        video_feed.controls.append(ft.Text("Папка uploads не найдена", size=20))
+            # Если видео нет, выводим дружелюбную надпись вместо ошибки
+            video_feed.controls.append(
+                ft.Container(
+                    content=ft.Text("Интерфейс загружен! ✅\nВидео в папке 'uploads' не найдены.", 
+                                  size=20, text_align="center"),
+                    padding=50
+                )
+            )
+        else:
+            for file in files:
+                video_feed.controls.append(create_video_card(file, "Admin"))
+    except Exception as e:
+        # Если случится любая другая ошибка — мы увидим её текст на экране
+        video_feed.controls.append(ft.Text(f"Ошибка системы: {e}", color="red"))
 
-    # 4. Нижнее меню (Navigation Bar)
+    # 4. Нижнее меню
     page.navigation_bar = ft.NavigationBar(
         destinations=[
             ft.NavigationDestination(icon=ft.icons.HOME, label="Главная"),
             ft.NavigationDestination(icon=ft.icons.PLAY_CIRCLE_OUTLINE, label="Shorts"),
-            ft.NavigationDestination(icon=ft.icons.ADD_CIRCLE_OUTLINE, label="", tooltip="Загрузить"),
             ft.NavigationDestination(icon=ft.icons.SUBSCRIPTIONS_OUTLINED, label="Подписки"),
-            ft.NavigationDestination(icon=ft.icons.PERSON_OUTLINE, label="Вы"),
         ],
     )
 
     page.add(video_feed)
 
-
-# Запускаем!
+# Финальный запуск
 ft.app(target=main)
