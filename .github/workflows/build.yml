@@ -23,10 +23,6 @@ jobs:
           channel: 'stable'
 
       - name: Build APK
-        run: yes | flet build apk mobile_app.py
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mytube-app
-          path: build/apk/*.apk
+        run: |
+          mv mobile_app.py main.py
+          yes | flet build apk
