@@ -1,8 +1,5 @@
 name: Build MyTube APK
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -20,13 +17,8 @@ jobs:
         run: |
           pip install flet requests
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
       - name: Build APK
-        run: flet build apk --main mobile_app.py
+        run: flet build apk --target mobile_app.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
